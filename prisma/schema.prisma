@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                 String  @id @default(cuid()) @map("_id")
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? 
+  access_token       String? 
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? 
+  session_state      String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+ 
+model Session {
+  id           String   @id @default(cuid()) @map("_id")
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@map("sessions")
+}
+ 
+model User {
+  id             String   @id @default(cuid()) @map("_id")
+  name           String?
+  email          String?  @unique
+  mobileNumber   String?
+  courseCategory String?
+  course         String?
+  applicationStatus String? // New field to store the application status
+  emailVerified  DateTime? @map("email_verified")
+  image          String?
+  password       String?
+  description    String?
+  accounts       Account[]
+  sessions       Session[]
+
+  @@map("users")
+}
+
+// schema.prisma
+
+model Blog {
+  id          String   @id @default(cuid()) @map("_id")
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Faculty {
+  id          String  @id @default(uuid()) @map("_id")
+  name        String
+  email       String  @unique
+  employeeId  String  @unique
+  department  String
+  designation String
+  mobileNumber String?  // New Field
+  password     String?  // New Field
+  createdAt   DateTime @default(now())
+}
+
+
+
+model contact {
+  id        String      @id @default(cuid()) @map("_id")
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+ 
+model VerificationToken {
+  identifier String @id @map("_id")
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
